@@ -1,0 +1,8 @@
+kmeans
+*.o
+*.out
+__pycache__/
+*.pyc
+test
+input_data.txt
+output_data.txt
