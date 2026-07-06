@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "kmeans: 2 400 < input_test.txt",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/kmeans.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "args": ["15", ""],
+      "stdin": { "path": "${workspaceFolder}/input1_test.txt" }
+    }
+  ]
+}
