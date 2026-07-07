@@ -79,7 +79,11 @@ if (iter <= 1 || iter >= MAX_ITER) {
     }
 
     result = scanf("%lf%c", &x, &c);
-    while (result == 2) {
+    while (result == 2 || result == 1) {
+        if (result == 1) {
+            c = '\n';
+        }
+
         if (size == capacity) {
             capacity = capacity * 2;
             temp = realloc(all_points_arr, capacity * sizeof(double));
@@ -96,17 +100,37 @@ if (iter <= 1 || iter >= MAX_ITER) {
         size++;
         curr_dim++;
 
+        if (c != ',' && c != '\n') {
+            free(all_points_arr);
+            printf("An Error Has Occurred\n");
+            return 1;
+        }
+
         if (c == '\n') {
             if (first_line) {
                 first_line = 0;
                 d = curr_dim;
+            } else if (curr_dim != d) {
+                free(all_points_arr);
+                printf("An Error Has Occurred\n");
+                return 1;
             }
             n++;
             curr_dim = 0;
         }
 
+        if (result == 1) {
+            break;
+        }
+
         result = scanf("%lf%c", &x, &c);
     }
+    if (result == 0 || curr_dim != 0 || first_line) {
+        free(all_points_arr);
+        printf("An Error Has Occurred\n");
+        return 1;
+    }
+
 if (k <= 1 || k >= n) {
     free(all_points_arr);
     printf("Incorrect number of clusters!\n");
@@ -126,6 +150,12 @@ if (k <= 1 || k >= n) {
         points[i] = malloc(d * sizeof(double));
 
         if (points[i] == NULL) {
+            int t;
+            for (t = 0; t < i; t++) {
+                free(points[t]);
+            }
+            free(points);
+            free(all_points_arr);
             printf("An Error Has Occurred\n");
             return 1;
         }
@@ -175,7 +205,15 @@ if (k <= 1 || k >= n) {
 
         /* run k-means iterations */
         for (iter_i = 0; iter_i < iter; iter_i++) {
-            int conv = update_centroids(points, centroids, k, d, n);
+            int conv;
+            conv = update_centroids(points, centroids, k, d, n);
+            if (conv == -1) {
+                for (i = 0; i < n; i++) free(points[i]);
+                free(points);
+                for (i = 0; i < k; i++) free(centroids[i]);
+                free(centroids);
+                return 1;
+            }
             if (conv) break;
         }
 
@@ -201,6 +239,7 @@ int update_centroids(double **points, double **centroids, int k, int d, int n)
     int closest_cent;
     double new_value;
     double diff;
+    double squared_shift;
     int converged = 1;
     
 
@@ -210,16 +249,24 @@ int update_centroids(double **points, double **centroids, int k, int d, int n)
     counts = malloc(k * sizeof(int));
 
     if (sums == NULL || counts == NULL) {
+        free(sums);
+        free(counts);
         printf("An Error Has Occurred\n");
-        return 1;
+        return -1;
     }
 
     for (i = 0; i < k; i++) {
         sums[i] = malloc(d * sizeof(double));
 
         if (sums[i] == NULL) {
+            int t;
+            for (t = 0; t < i; t++) {
+                free(sums[t]);
+            }
+            free(sums);
+            free(counts);
             printf("An Error Has Occurred\n");
-            return 1;
+            return -1;
         }
 
         counts[i] = 0;
@@ -243,13 +290,15 @@ int update_centroids(double **points, double **centroids, int k, int d, int n)
             continue;
         }
 
+        squared_shift = 0.0;
         for (j = 0; j < d; j++) {
             new_value = sums[i][j] / counts[i];
             diff = new_value - centroids[i][j];
             centroids[i][j] = new_value;
-            if (diff > EPSILON || diff < -EPSILON) {
-                converged = 0;
-            }
+            squared_shift += diff * diff;
+        }
+        if (squared_shift >= EPSILON * EPSILON) {
+            converged = 0;
         }
     }
 
