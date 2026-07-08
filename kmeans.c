@@ -409,18 +409,34 @@ int parse_positive_int(char *str, int *result)
 
     int i;
     int value;
+    int seen_dot;
 
     if (str[0] == '\0') {
         return 0;
     }
     value = 0;
+    seen_dot = 0;
 
     for (i = 0; str[i] != '\0'; i++) {
+
+        if (str[i] == '.') {
+            if (seen_dot || i == 0) {
+                return 0;
+            }
+            seen_dot = 1;
+            continue;
+        }
 
         if (str[i] < '0' || str[i] > '9') {
             return 0;
         }
-        value = value * 10 + (str[i] - '0');
+        if (seen_dot) {
+            if (str[i] != '0') {
+                return 0;
+            }
+        } else {
+            value = value * 10 + (str[i] - '0');
+        }
     }
     *result = value;
     return 1;
