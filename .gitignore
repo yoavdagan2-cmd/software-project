@@ -4,3 +4,18 @@ kmeans
 __pycache__/
 *.pyc
 test
+
+# Local development files
+.vscode/
+.DS_Store
+__pycache__/
+*.pyc
+build/
+*.so
+
+# Compiled programs and test output
+HW1/kmeans
+HW1/kmeans_check
+HW1/kmeans_debug
+HW1/actual_*.txt
+HW1/out_check_*.txt
